@@ -9,8 +9,9 @@
             <h5>Edit Business</h5>
         </div>
         <div class="card-body">
-            <form action="{{ route('business.update', $business->id) }}" method="POST">
+            <form action="{{ route('business.update', ['business_id' => $business->id]) }}" method="POST">
                 @csrf
+                @method('PUT')
                 @include('business.partials.form', ['business' => $business])
                 <div class="text-end">
                     <button type="submit" class="btn btn-primary">Update</button>

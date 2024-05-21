@@ -38,7 +38,7 @@
                         <a href="{{ route('user.index') }}">
                             <div class="card">
                                 <div class="card-body text-center">
-                                    <i class="bi bi-gear display-4 text-success mt-5 "></i>
+                                    <i class="bi bi-people display-4 text-success mt-5"></i>
                                     <span class="fw-medium d-block mb-3 text-dark">All Users
                                     </span>
                                     <h3 class="card-title">{{ $totalusers }}</h3>
@@ -61,7 +61,7 @@
                         <a href="">
                             <div class="card">
                                 <div class="card-body text-center">
-                                    <i class="bi bi-people display-4 text-success mt-5 "></i>
+                                    <i class="bi bi-building display-4 text-success mt-5"></i>
                                     <span
                                         class="fw-medium d-block mb-3  text-dark">Businesses</span>
                                     <h3 class="card-title">{{ $totalbusinesses }}</h3>

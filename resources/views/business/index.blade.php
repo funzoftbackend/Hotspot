@@ -73,7 +73,7 @@
                                                 <i class="bx bx-dots-vertical-rounded"></i>
                                             </button>
                                             <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="{{ route('business.edit', $business->id) }}"><i class="bx bx-edit-alt me-1 text-success"></i> Edit</a>
+                                                <a class="dropdown-item" href="{{ route('business.edit', ['business_id' => $business->id]) }}"><i class="bx bx-edit-alt me-1 text-success"></i> Edit</a>
                                                 <a class="dropdown-item" href="{{ route('business.destroy', $business->id) }}" onclick="event.preventDefault(); document.getElementById('delete-form-{{ $business->id }}').submit();"><i class="bx bx-trash me-1 text-danger"></i> Delete</a>
                                                 <form id="delete-form-{{ $business->id }}" action="{{ route('business.destroy', $business->id) }}" method="POST" style="display: none;">
                                                     @csrf

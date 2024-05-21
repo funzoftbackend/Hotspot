@@ -39,6 +39,7 @@
         <div class="card-body">
             <form action="{{ route('user.update', $user->id) }}" enctype="multipart/form-data" method="post">
                 @csrf
+                @method('PUT')
                 <div class="row">
                     <div class="col-md-12 col-12">
                         <div class="mb-3">
@@ -67,7 +68,7 @@
                         <div class="mb-3">
                             <label for="exampleFormControlInput1" class="form-label">
                                 Address</label>
-                            <input type="text" name="address" value="{{ $user->address }}"
+                            <input type="text" name="address" value="{{ $user->address ? $user->address->address : 'No address available' }}"
                                 class="form-control" placeholder="Address"
                                 id="address" required autocomplete="off" />
                             <div id="address"></div>
@@ -87,8 +88,8 @@
                     <div class="col-md-12 col-12">
                         <div class="mb-3">
                             <label for="exampleFormControlInput1" class="form-label">Phone</label>
-                            <input type="name" name="phone" value="{{ $user->phone }}"
-                                class="form-control @error('phone') is-invalid @enderror" placeholder="Phone" required />
+                            <input type="text" name="phone_number" value="{{ $user->phone_number }}"
+                                class="form-control @error('phone_number') is-invalid @enderror" placeholder="Phone" required />
                         </div>
                     </div>
                     <div class="col-md-6 col-12">

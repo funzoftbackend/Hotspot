@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use App\Models\DomainSteps;
 use App\Models\User;
 use App\Models\Country;
+use App\Models\UserAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
@@ -16,6 +17,9 @@ class UserController extends Controller
     {
         $user = Auth::user();
         $users = User::where('id','!=',$user->id)->get();
+        foreach($users as $user){
+            $user->address = UserAddress::find($user->address_id);
+        }
         return view('user.index', compact('users','user'));
     }
 
@@ -32,18 +36,21 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required',
-            'image' => 'required',
-            'address_id' => 'required'
+            'phone_number' => 'required',
+            'address' => 'required'
         ]);
         
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
+        $address = new UserAddress();
+        $address->address = $request->address;
+        $address->save();
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
         $user->image = $request->image;
-        $user->address_id = $request->address_id;
+        $user->address_id = $address->id;
         $user->password = bcrypt($request->password);
         $user->save();
         // Mail::to($user->email)->send(new UserEmail($user->email, $password, url('login')));
@@ -61,6 +68,8 @@ class UserController extends Controller
     {
         $user_id = $_GET['user_id'];
         $user = User::find($user_id);
+        $user->address = UserAddress::find($user->address_id);
+       
         return view('user.edit', compact('user'));
     }
 
@@ -68,27 +77,35 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required',
-            'image' => 'required',
-            'address_id' => 'required'
+            'email' => 'required|email',
+            'phone_number' => 'required',
+            'address' => 'required'
         ]);
-    
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
-    
+        $address = UserAddress::where('user_id',$user->id)->first();
+        if($address){
+        $address->address = $request->address;
+        $address->save();
+        }else{
+        $address = new UserAddress();
+        $address->address = $request->address;
+        $address->user_id = $user->id;
+        $address->save(); 
+        }
         $data = [
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,
-            'address_id' => $request->address_id
+            'phone_number' => $request->phone_number,
+            'address_id' => $address->id
         ];
-        if ($request->hasFile('image')) {
-            $imageName = time().'.'.$request->image->extension();
-            $request->image->move(public_path('img'), $imageName);
-            $data['image'] = 'img/'.$imageName;
-        }
+        // if ($request->hasFile('image')) {
+        //     $imageName = time().'.'.$request->image->extension();
+        //     $request->image->move(public_path('img'), $imageName);
+        //     $data['image'] = 'img/'.$imageName;
+        // }
         $user->update($data);
     
         return redirect()->route('user.index')->with('success', 'User updated successfully.');

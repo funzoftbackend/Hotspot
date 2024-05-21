@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Business;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 class BusinessController extends Controller
 {
@@ -56,15 +57,17 @@ class BusinessController extends Controller
         return redirect()->route('business.index')->with('success', 'Business created successfully.');
     }
 
-    public function edit($id)
+    public function edit()
     {
         $user = Auth::user();
+        $id = $_GET['business_id'];
         $business = Business::findOrFail($id);
         return view('business.edit', compact('business','user'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
+        $id = $_GET['business_id'];
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'user_id' => 'required|string',

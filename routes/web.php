@@ -76,13 +76,13 @@ Route::get('/logout', function () {
     Route::get('/user/{user}', [UserController::class, 'show'])->name('user.show');
     Route::get('/edit-user', [UserController::class, 'edit'])->name('user.edit');
     Route::put('/update/{user}', [UserController::class, 'update'])->name('user.update');
-    Route::delete('/delete-user/{user}', [UserController::class, 'destroy'])->name('user.destroy');
+    Route::get('/delete-user/{user}', [UserController::class, 'destroy'])->name('user.destroy');
     Route::get('/businesses', [BusinessController::class, 'index'])->name('business.index');
     Route::get('/create', [BusinessController::class, 'create'])->name('business.create');
     Route::post('/store', [BusinessController::class, 'store'])->name('business.store');
     Route::get('/business/{business}', [BusinessController::class, 'show'])->name('business.show');
     Route::get('/edit-business', [BusinessController::class, 'edit'])->name('business.edit');
-    Route::put('/update/{business}', [BusinessController::class, 'update'])->name('business.update');
+    Route::put('/update', [BusinessController::class, 'update'])->name('business.update');
     Route::delete('/delete-business/{business}', [BusinessController::class, 'destroy'])->name('business.destroy');
     
 // });

@@ -38,11 +38,17 @@
                                         <span class="fw-medium">{{ ucfirst($user->name) }}</span>
                                     </td>
                                     <td>{{ $user->email }}</td>
+                                    @if(!empty($user->address))
+                                        <td>
+                                        {{ $user->address->address }}
+                                        </td>
+                                    @else
+                                        <td>
+                                            Address Not Found
+                                        </td>
+                                    @endif
                                     <td>
-                                    {{ $user->address }}
-                                </td>
-                                    <td>
-                                        {{ $user->phone }}
+                                        {{ $user->phone_number }}
                                     </td>
                                     <td>
                                         <div class="dropdown">

@@ -35,25 +35,21 @@ class LoginController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'email' => 'required|email|unique:users',
-            'mobile_no' => 'required',
-            // 'passport_one_img' => 'required',
-            // 'passport_two_img' => 'required',
-
+            'phone_number' => 'required',
+            'password' => 'required',
         ]);
          if ($validator->fails()) {
-             return response()->json(['success' => 'false','message' => $validator->errors()->first()], 422);
+             return redirect()->back()->with(['success' => 'false','message' => $validator->errors()->first()], 422);
         }
         $user = new User();
-        $password = Str::random(8);
+        $password = $request->password;
         $user->name = $request->name;
-        $user->mobile_no = $request->mobile_no;
+        $user->phone_number = $request->phone_number;
         $user->email = $request->email;
-        $user->user_role = $request->user_role;
         $user->password = bcrypt($password);
         $user->save();
-        Mail::to($user->email)->send(new UserEmail($user->email, $password, url('login')));
         $token = $user->createToken('authToken')->plainTextToken;
-        return response()->json([ 'success' => 'true','message' => 'User Saved Successfully','token' => $token]);
+       return redirect('login')->with([ 'success' => 'true','message' => 'User Saved Successfully','token' => $token]);
     }
     public function post_login(Request $request)
 {

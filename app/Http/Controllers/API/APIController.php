@@ -1051,6 +1051,7 @@ public function driver_signin(Request $request)
             $driver = Driver::where('user_id',$user->id)->first();
             $order = Order::find($driver->offered_order);
             $order->delivery_stage = 4;
+            $order->order_status = 'delivered';
             if($order->save()){
             return response()->json([
                 'success' => true,
@@ -1137,6 +1138,12 @@ public function driver_signin(Request $request)
             $order->driver_id = $driver->id;
             $order->driver_distance = $totaldriverdistance;
             $order->driver_payment = $totaldriverdistance * 0.05;
+            $order->delivery_stage = 2;
+            $drivers = Driver::where('offered_order',$driver->offered_order)->get();
+            foreach($drivers as $driver){
+                $driver->offered_order = NULL;
+                $driver->save();
+            }
             if($order->save()){
             return response()->json([
                 'success' => true,
@@ -1151,10 +1158,13 @@ public function driver_signin(Request $request)
             }
             }
             else{
+                $driver = Driver::where('user_id',$user->id)->first();
+                $driver->offered_order = NULL;
+                $driver->save();
                   return response()->json([
-                'success' => false,
+                'success' => true,
                 'message' => 'Order Rejected'
-            ], 422);
+            ], 200);
             }
     }
      public function get_last_offer(Request $request)
@@ -1162,10 +1172,31 @@ public function driver_signin(Request $request)
             $user = Auth::user();
             $driver = Driver::where('user_id',$user->id)->first();
             $order = Order::find($driver->offered_order);
+            $buyer = User::find($order->buyer_id);
+            $orderitem = OrderItem::where('user_id',$buyer->id)->first();
+            $product = Product::find($orderitem->product_id);
+            $buyeraddress = UserAddress::find($buyer->address_id);
+            $driverLat = $driver->latitude;
+            $driverLng = $driver->longitude;
+             if($buyeraddress){
+            $buyerLat = $buyeraddress->latitude;
+            $buyerLng = $buyeraddress->longitude;
+            }else{
+            $buyerLat = 0;
+            $buyerLng = 0; 
+            }
+            $business = Business::find($product->business_id);
+            $businessLat = $business->latitude;
+            $businessLng = $business->longitude;
+            $driverbusinessDistance = $this->calculateDistance($driverLat, $driverLng, $businessLat, $businessLng);
+            $buyerbusinessDistance = $this->calculateDistance($buyerLat, $buyerLng, $businessLat, $businessLng);
+            $totaldriverdistance = $driverbusinessDistance + $buyerbusinessDistance;
             $order->buyer = User::find($order->buyer_id);
             $order->buyer->address = UserAddress::find($order->buyer->address_id);
             $order->driver = $driver;
             $order->vendor = Business::find($order->vendor_id);
+            $order->driver_distance = strval($totaldriverdistance);
+            $order->driver_payment = strval($totaldriverdistance * 0.05);
             if($order){
             return response()->json(['order' => $order,
                 'success' => true,

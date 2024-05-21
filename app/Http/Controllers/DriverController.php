@@ -130,13 +130,14 @@ class DriverController extends Controller
     }
     public function dashboard_driver_show(Driver $driver)
     {
+         $driver_id = $_GET['driver_id'];
+        $driver = Driver::find($driver_id);
         $user = Auth::user();
         return view('dashboarddrivers.show', compact('driver','user'));
     }
     public function show()
     {
-        $driver_id = $_GET['driver_id'];
-        $driver = Driver::find($driver_id);
+       
         $user = Auth::user();
         return view('drivers.show', compact('driver','user'));
     }
@@ -218,8 +219,8 @@ class DriverController extends Controller
          if ($validated['phone_number'] && strpos($validated['phone_number'], '+1') !== 0) {
                 $validated['phone_number'] = '+1' . $validated['phone_number'];
             }
-              $request->hasFile('license_front');
-        if ($validated['license_front']) {
+             
+        if (isset($validated['license_front'])) {
             $imageName = time().'.'.$validated['license_front']->extension();
           
             $validated['license_front']->move(public_path(), $imageName);
@@ -228,7 +229,7 @@ class DriverController extends Controller
              $validated['license_front'] = $imagePath1;
         }
 
-        if ($validated['license_back']) {
+        if (isset($validated['license_back'])) {
             $imageName = time().'.'.$validated['license_back']->extension();
           
             $validated['license_back']->move(public_path(), $imageName);
@@ -236,22 +237,23 @@ class DriverController extends Controller
              $validated['license_back'] = $imagePath1;
         }
         $driver->update($validated);
-        
         return redirect()->route('dashboard_drivers.index')->with('success', 'Driver updated successfully.');
     }
-    public function dashboard_driver_destroy(Driver $driver)
+    public function dashboard_drivers_destroy(Driver $driver)
     {
         $user = User::find($driver->user_id);
-        dd($driver);
+        if($user){
         $user->delete();
+        }
         $driver->delete();
         return redirect()->route('dashboard_drivers.index')->with('success', 'Driver deleted successfully.');
     }
     public function destroy(Driver $driver)
     {
         $user = User::find($driver->user_id);
-        dd($driver);
+        if($user){
         $user->delete();
+        }
         $driver->delete();
         return redirect()->route('drivers.index')->with('success', 'Driver deleted successfully.');
     }

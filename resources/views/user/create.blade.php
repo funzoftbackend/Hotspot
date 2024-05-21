@@ -97,9 +97,9 @@
                         <div class="mb-3">
                             <label for="exampleFormControlInput1" class="form-label">
                                 Phone</label>
-                            <input type="name" name="phone" value="{{ old('phone') }}"
-                                class="form-control @error('phone') is-invalid @enderror"
-                                placeholder="Phone" required />
+                            <input type="text" name="phone_number" value="{{ old('phone_number') }}"
+                                class="form-control @error('phone_number') is-invalid @enderror"
+                                placeholder="Phone Number" required />
                         </div>
                     </div>
 

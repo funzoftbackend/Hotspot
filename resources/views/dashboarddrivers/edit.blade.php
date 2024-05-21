@@ -35,7 +35,7 @@
     <div class="card mb-4">
         <h5 class="card-header">Edit Driver</h5>
         <div class="card-body">
-            <form action="{{ route('dashboard_drivers.store') }}" enctype="multipart/form-data" method="post">
+            <form action="{{ route('drivers.update',$driver) }}" enctype="multipart/form-data" method="post">
                 @csrf
                 
                 <div class="row">
@@ -298,7 +298,7 @@
                                 class="form-label">Password</label>
                             <input type="password" name="password"
                                 class="form-control @error('password') is-invalid @enderror"
-                                placeholder="Password" required />
+                                placeholder="Password" />
                             @error('Password')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -312,7 +312,7 @@
                                 class="form-label">Confirm Password</label>
                             <input type="password" name="password_confirmation"
                                 class="form-control  @error('password_confirmation') is-invalid @enderror"
-                                placeholder="Confirm Password" required />
+                                placeholder="Confirm Password"/>
                             @error('password_confirmation')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>

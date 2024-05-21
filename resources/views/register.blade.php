@@ -84,15 +84,27 @@
               <!-- /Logo -->
               <h4 class="mb-2">Adventure starts here 🚀</h4>
               <p class="mb-4">Make your app management easy and fun!</p>
-              <form id="formAuthentication" class="mb-3" action="index.html" method="POST">
+              <form id="formAuthentication" class="mb-3" action="{{route('post_signup')}}" method="POST">
+                  @csrf
                 <div class="mb-3">
-                  <label for="username" class="form-label">Username</label>
+                  <label for="phone_number" class="form-label">Phone Number</label>
                   <input
                     type="text"
                     class="form-control"
-                    id="username"
-                    name="username"
-                    placeholder="Enter your username"
+                    id="phone_number"
+                    name="phone_number"
+                    placeholder="Enter your Phone number"
+                    autofocus
+                  />
+                </div>
+                 <div class="mb-3">
+                  <label for="name" class="form-label">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    placeholder="Enter your Name"
                     autofocus
                   />
                 </div>
