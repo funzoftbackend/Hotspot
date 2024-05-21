@@ -18,7 +18,7 @@ class LoginController extends Controller
     public function signup(Request $request)
     {
     
-    return view('signup');
+    return view('register');
     }
     public function forgot_password(Request $request)
     {
@@ -57,11 +57,11 @@ class LoginController extends Controller
     }
     public function post_login(Request $request)
 {
-    // Validate the request data
     $request->validate([
         'email' => 'required|email',
         'password' => 'required',
     ]);
+
     $credentials = $request->only('email', 'password');
     
     if (Auth::attempt($credentials)) {
