@@ -90,7 +90,7 @@
                                 </td>
                                 <td>
                                     <a href="{{ route('dashboard_drivers.show', ['driver_id' => $driver->id]) }}" class="btn btn-info btn-sm">View</a>
-                                    <a href="{{ route('drivers.edit', $driver) }}" class="btn btn-primary btn-sm">Edit</a>
+                                    <a href="{{ route('drivers.edit', ['driver_id' => $driver->id]) }}" class="btn btn-primary btn-sm">Edit</a>
                                     @if($driver->is_verified == 1)
                                     @else
                                     <form action="{{ route('dashboard_drivers.verify', $driver) }}" method="POST" style="display:inline;">

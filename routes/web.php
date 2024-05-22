@@ -31,7 +31,7 @@ Route::post('driver-store', [DriverController::class, 'store'])->name('drivers.s
 Route::post('dashboard-driver-store', [DriverController::class, 'dashboard_driver_store'])->name('dashboard_drivers.store');
 Route::get('driver-show/{driver}', [DriverController::class, 'show'])->name('drivers.show');
 Route::get('dashboard-driver-show', [DriverController::class, 'dashboard_driver_show'])->name('dashboard_drivers.show');
-Route::get('driver-edit/{driver}', [DriverController::class, 'edit'])->name('drivers.edit');
+Route::get('driver-edit', [DriverController::class, 'edit'])->name('drivers.edit');
 Route::post('driver-update/{driver}', [DriverController::class, 'update'])->name('drivers.update');
 Route::post('driver-delete/{driver}', [DriverController::class, 'destroy'])->name('drivers.destroy');
 Route::post('dashboard-driver-delete/{driver}', [DriverController::class, 'dashboard_drivers_destroy'])->name('dashboard_drivers.destroy');

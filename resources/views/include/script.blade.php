@@ -37,6 +37,14 @@
          $('#admin').DataTable();
         
      });
+     let menuToggler = document.querySelectorAll('.layout-menu-toggle');
+  menuToggler.forEach(item => {
+    item.addEventListener('click', event => {
+      event.preventDefault();
+      window.Helpers.toggleCollapsed();
+    });
+  });
+
  </script>
 
 

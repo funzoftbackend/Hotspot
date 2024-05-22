@@ -24,7 +24,7 @@
                 </a>
             </li>
             <li
-                class="menu-item {{ Request::is('businesses') ? 'active' : '' }}">
+                class="menu-item {{ Request::is('businesses') || Request::is('edit-business') ? 'active' : '' }}">
                 <a href="{{ route('business.index') }}" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bxs-business"></i>
                     <div data-i18n="Layouts">Businesses</div>
@@ -32,7 +32,7 @@
             </li>
 
 
-            <li class="menu-item {{ Request::is('users') ? 'active' : '' }}">
+            <li class="menu-item {{ Request::is('users') || Request::is('edit-user') ? 'active' : '' }}">
                 <a href="{{ route('user.index') }}" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bi bi-person"></i>
                     <div data-i18n="Analytics"> Users</div>
@@ -41,7 +41,7 @@
 
             <!-- Layouts -->
             <li
-                class="menu-item {{ Request::is('dashboard-drivers') || Request::is('dashboard-driver-show') ? 'active' : '' }}">
+                class="menu-item {{ Request::is('dashboard-drivers') || Request::is('dashboard-driver-show') || Request::is('driver-edit') ? 'active' : '' }}">
                 <a href="{{ route('dashboard_drivers.index') }}" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bi bi-person"></i>
                     <div data-i18n="Layouts">Drivers</div>

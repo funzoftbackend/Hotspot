@@ -191,8 +191,10 @@ class DriverController extends Controller
         return redirect()->route('dashboard_drivers.index')->with('success', 'Driver created successfully.');
         }
     }
-    public function edit(Driver $driver)
+    public function edit()
     {
+        $id = $_GET['driver_id'];
+        $driver = Driver::find($id);
         $user = Auth::user();
         return view('dashboarddrivers.edit', compact('driver','user'));
     }

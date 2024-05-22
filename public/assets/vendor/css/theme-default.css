@@ -213,6 +213,7 @@ button.list-group-item-primary.active {
 }
 
 .btn-primary {
+  margin-top: 1%;
   color: #fff;
   background-color: #C1272D;
   border-color: #C1272D;
