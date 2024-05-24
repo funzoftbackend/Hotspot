@@ -28,7 +28,7 @@ class LoginController extends Controller
     public function error()
     {
     
-        return response()->json(['success' => 'false','message' => 'Invalid Token or unauthorized request'], 422);
+        return redirect('login')->with([ 'success' => 'false','message' => 'Logged In First']);
     }
     public function post_signup(Request $request)
     {

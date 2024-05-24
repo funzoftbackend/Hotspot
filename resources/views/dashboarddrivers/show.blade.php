@@ -104,8 +104,78 @@
                         <p>No license back image uploaded.</p>
                     @endif
                 </div>
+                 <div class="col-md-6 mbb-2">
+                    @if($driver->is_verified == 1)
+                    @else
+                    <form action="{{ route('dashboard_drivers.verify', ['driver_id' => $driver->id]) }}" method="POST" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-info btn-sm">Verify</button>
+                    </form>
+                    @endif
+                    @if($driver->is_verified == 1)
+                            <button type="button" class="btn btn-danger unverify-button" data-toggle="modal" data-target="#rejectModal_{{ $driver->id }}">Unverify</button>
+                            <div id="rejectModal_{{ $driver->id }}" class="modal" tabindex="-1" role="dialog">
+                                        <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Unverification Reason</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="border: none; background: none;">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form method="POST" id="reject-form-{{ $driver->id }}" action="{{ route('dashboard_drivers.unverify') }}">
+                                                @csrf
+                                                <input type="hidden" name="driver_id" value="{{ $driver->id }}">
+                                                <div class="form-group">
+                                                    <textarea name="reason" class="form-control reason-input" id="reason" placeholder="Enter Unverification reason" style="width: 100%; height: 100px;" required></textarea>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-danger mt-2" onclick="submitRejectForm({{ $driver->id }})">Confirm Unverification</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+        $(document).ready(function() {
+        // Show reason input when unverify button is clicked
+        $('.unverify-button').on('click', function() {
+            var driverId = $(this).closest('.card').find('input[name="driver_id"]').val();
+            $('#rejectModal_' + driverId).modal('show');
+        });
+    
+        // Close modal when cancel button is clicked
+        $('.close').on('click', function() {
+            $(this).closest('.modal').modal('hide');
+        });
+    
+        // Close modal when cancel primary button is clicked
+        $('.btn-primary').on('click', function() {
+            $(this).closest('.modal').modal('hide');
+        });
+    
+        // Validate rejection reason before form submission
+        $(document).on('click', '.btn-danger.mt-2', function(e)  {
+            e.preventDefault();
+            var reasonInput = $(this).closest('.modal').find('.reason-input');
+            var reason = reasonInput.val().trim();
+            if (!reason) {
+                alert('Please enter a unverification reason first.');
+            } else {
+                $(this).closest('.modal').find('form').submit();
+            }
+        });
+    });
+
+</script>
 @endsection

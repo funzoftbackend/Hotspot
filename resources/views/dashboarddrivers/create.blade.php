@@ -1,7 +1,7 @@
-@extends('app')
+@extends('app1')
 @section('title')
     <title>
-        Create Driver
+        Sign Up as Driver
     </title>
 @endsection
 @section('css')
@@ -33,7 +33,7 @@
 @endsection
 @section('content')
     <div class="card mb-4">
-        <h5 class="card-header">Create Driver</h5>
+        <h5 class="card-header">Sign Up as Driver</h5>
         <div class="card-body">
             <form action="{{ route('dashboard_drivers.store') }}" enctype="multipart/form-data" method="post">
                 @csrf
@@ -308,15 +308,6 @@
                             @enderror
                         </div>
                     </div>
-
-                    <div class="col-md-4 col-12">
-                        <div class="mb-3">
-                            <input type="checkbox" name="save_address" id="save_address" class="form-check-input">
-                            <label for="save_address"
-                                class="form-check-label">Save Address for Future</label>
-                        </div>
-                    </div>
-
                     <div class="text-end">
                         <button class="btn btn-outline-primary" type="submit">
                             Submit</button>

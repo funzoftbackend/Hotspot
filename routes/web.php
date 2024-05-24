@@ -18,23 +18,9 @@ use App\Http\Controllers\UserController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::get('driver-signup', [DriverController::class, 'dashboard_driver_create'])->name('dashboard_drivers.create');
 
-});
-Route::get('drivers', [DriverController::class, 'index'])->name('drivers.index');
-Route::get('dashboard-drivers', [DriverController::class, 'dashboard_driver_index'])->name('dashboard_drivers.index');
-Route::get('driver-create', [DriverController::class, 'create'])->name('drivers.create');
-Route::get('dashboard-driver-create', [DriverController::class, 'dashboard_driver_create'])->name('dashboard_drivers.create');
-Route::post('driver-verify/{driver}', [DriverController::class, 'verify'])->name('drivers.verify');
-Route::post('dashboard-driver-verify/{driver}', [DriverController::class, 'dashboard_driver_verify'])->name('dashboard_drivers.verify');
-Route::post('driver-store', [DriverController::class, 'store'])->name('drivers.store');
-Route::post('dashboard-driver-store', [DriverController::class, 'dashboard_driver_store'])->name('dashboard_drivers.store');
-Route::get('driver-show/{driver}', [DriverController::class, 'show'])->name('drivers.show');
-Route::get('dashboard-driver-show', [DriverController::class, 'dashboard_driver_show'])->name('dashboard_drivers.show');
-Route::get('driver-edit', [DriverController::class, 'edit'])->name('drivers.edit');
-Route::post('driver-update/{driver}', [DriverController::class, 'update'])->name('drivers.update');
-Route::post('driver-delete/{driver}', [DriverController::class, 'destroy'])->name('drivers.destroy');
-Route::post('dashboard-driver-delete/{driver}', [DriverController::class, 'dashboard_drivers_destroy'])->name('dashboard_drivers.destroy');
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -67,22 +53,34 @@ Route::get('/logout', function () {
     Auth::logout();
     return redirect()->route('login');
 })->name('logout');
-// Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::get('/user-create', [UserController::class, 'create'])->name('user.create');
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::post('/user-store', [UserController::class, 'store'])->name('user.store');
     Route::get('/users', [UserController::class, 'index'])->name('user.index');
-    Route::get('/user/{user}', [UserController::class, 'show'])->name('user.show');
-    Route::get('/edit-user', [UserController::class, 'edit'])->name('user.edit');
+    Route::get('/user', [UserController::class, 'show'])->name('user.show');
     Route::put('/update/{user}', [UserController::class, 'update'])->name('user.update');
     Route::get('/delete-user/{user}', [UserController::class, 'destroy'])->name('user.destroy');
     Route::get('/businesses', [BusinessController::class, 'index'])->name('business.index');
     Route::get('/create', [BusinessController::class, 'create'])->name('business.create');
     Route::post('/store', [BusinessController::class, 'store'])->name('business.store');
-    Route::get('/business/{business}', [BusinessController::class, 'show'])->name('business.show');
-    Route::get('/edit-business', [BusinessController::class, 'edit'])->name('business.edit');
-    Route::put('/update', [BusinessController::class, 'update'])->name('business.update');
+    Route::get('/business', [BusinessController::class, 'show'])->name('business.show');
+    // Route::get('/edit-business', [BusinessController::class, 'edit'])->name('business.edit');
+    // Route::put('/update', [BusinessController::class, 'update'])->name('business.update');
     Route::delete('/delete-business/{business}', [BusinessController::class, 'destroy'])->name('business.destroy');
+    Route::get('drivers', [DriverController::class, 'index'])->name('drivers.index');
+    Route::get('dashboard-drivers', [DriverController::class, 'dashboard_driver_index'])->name('dashboard_drivers.index');
+    Route::get('driver-create', [DriverController::class, 'create'])->name('drivers.create');
+    Route::post('dashboard-driver-unverify', [DriverController::class, 'dashboard_driver_unverify'])->name('dashboard_drivers.unverify');
+    Route::post('dashboard-driver-verify', [DriverController::class, 'dashboard_driver_verify'])->name('dashboard_drivers.verify');
+    Route::post('driver-store', [DriverController::class, 'store'])->name('drivers.store');
+    Route::post('dashboard-driver-store', [DriverController::class, 'dashboard_driver_store'])->name('dashboard_drivers.store');
+    Route::get('driver-show/{driver}', [DriverController::class, 'show'])->name('drivers.show');
+    Route::get('dashboard-driver-show', [DriverController::class, 'dashboard_driver_show'])->name('dashboard_drivers.show');
+    // Route::get('driver-edit', [DriverController::class, 'edit'])->name('drivers.edit');
+    // Route::post('driver-update/{driver}', [DriverController::class, 'update'])->name('drivers.update');
+    Route::post('driver-delete/{driver}', [DriverController::class, 'destroy'])->name('drivers.destroy');
+    Route::post('dashboard-driver-delete/{driver}', [DriverController::class, 'dashboard_drivers_destroy'])->name('dashboard_drivers.destroy');
     
-// });
+});

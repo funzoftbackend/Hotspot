@@ -50,6 +50,13 @@
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('/public/assets/js/config.js') }}"></script>
 </head>
+<style>
+     body{
+            background-image: url('{{ asset('/public/rest.jpg') }}');
+            background-size: cover;
+            background-position: center;
+        }
+</style>
 
 <body>
     <!-- Content -->
@@ -86,7 +93,7 @@
                 <button class="btn btn-primary d-grid w-100">Send Reset Link</button>
               </form>
               <div class="text-center">
-                <a href="auth-login-basic.html" class="d-flex align-items-center justify-content-center">
+                <a href="{{ route('login')}}" class="d-flex align-items-center justify-content-center">
                   <i class="bx bx-chevron-left scaleX-n1-rtl bx-sm"></i>
                   Back to login
                 </a>

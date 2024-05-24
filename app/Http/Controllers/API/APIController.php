@@ -45,6 +45,7 @@ class APIController extends Controller
                 return response()->json(['success' => 'false','message' => $errors->first('password')], 422);
             }
         }
+  
         $credentials = $request->only('email', 'password');
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
@@ -93,45 +94,45 @@ class APIController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     
-        
-}
-public function driver_signin(Request $request)
-{
-        $validator = Validator::make($request->all(), [
-        'phone_number' => 'required',
-        'passcode' => 'required',
-        ]);
-        
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json(['success' => false, 'message' => $errors->first()], 422);
-        }
-        
-        $driver = Driver::where('phone_number', $request->phone_number)->first();
-        
-        if (!$driver) {
-            return response()->json(['success' => false, 'message' => 'Driver not found'], 404);
-        }
-        
-        if ($driver->is_verified == 0) {
-            return response()->json(['success' => false, 'message' => 'Verification Pending, Contact Admin For Approval'], 422);
-        }
-        
-        $user = User::find($driver->user_id);
-        
-        $request->merge(['email' => $user->email,'password' => $driver->password]);
-        $credentials = $request->only('phone_number', 'password'); 
-        if (Auth::attempt(['phone_number' => $credentials['phone_number'], 'password' => $credentials['password']])) {
-            $user = Auth::user();
-            $token = $user->createToken('authToken')->plainTextToken;
-            return response()->json(['success' => true, 'message' => 'Login Successful', 'token' => $token], 200);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Invalid Email or Password'], 422);
-        }
-        
             
-        
-}
+    }
+    public function driver_signin(Request $request)
+    {
+            $validator = Validator::make($request->all(), [
+            'phone_number' => 'required',
+            'passcode' => 'required',
+            ]);
+            
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                return response()->json(['success' => false, 'message' => $errors->first()], 422);
+            }
+            
+            $driver = Driver::where('phone_number', $request->phone_number)->first();
+            
+            if (!$driver) {
+                return response()->json(['success' => false, 'message' => 'Driver not found'], 404);
+            }
+            
+            if ($driver->is_verified == 0) {
+                return response()->json(['success' => false, 'message' => 'Verification Pending, Contact Admin For Approval'], 422);
+            }
+            
+            $user = User::find($driver->user_id);
+            
+            $request->merge(['email' => $user->email,'password' => $driver->password]);
+            $credentials = $request->only('phone_number', 'password'); 
+            if (Auth::attempt(['phone_number' => $credentials['phone_number'], 'password' => $credentials['password']])) {
+                $user = Auth::user();
+                $token = $user->createToken('authToken')->plainTextToken;
+                return response()->json(['success' => true, 'message' => 'Login Successful', 'token' => $token], 200);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Invalid Email or Password'], 422);
+            }
+            
+                
+            
+    }
     public function logout(Request $request)
     {
         $user = auth()->user();
@@ -350,6 +351,53 @@ public function driver_signin(Request $request)
             }
         }
     }
+     public function get_product_orders()
+    {
+        $user = Auth::user(); 
+        
+        $orders = Order::where('buyer_id', $user->id)->get();
+        
+        $response = [];
+        foreach ($orders as $order) {
+            $cart = Cart::find($order->cart_id);
+            $order_ids = json_decode($cart->order_ids);
+            foreach($order_ids as $order_id){
+            $orderitem = OrderItem::find($order_id);
+            $product = Product::find($orderitem->product_id);
+            $response[] = [
+                'product' => $product,
+                'order' => $order
+            ];
+            }
+        }
+        if($response){
+        return response()->json(['products' => $response,'success' => true, 'message' => 'Orders Products Fetched successfully'], 200);
+        }else{
+        return response()->json(['success' => false, 'message' => 'Error Fetching Orders Products'], 422);
+        }
+    }
+     public function get_driver_orders()
+        {
+            $user = Auth::user(); 
+            $driver = Driver::where('user_id',$user->id)->first();
+            $orders = Order::where('driver_id', $driver->id)->get();
+            $response = [];
+            foreach ($orders as $order) {
+                $cart = Cart::find($order->cart_id);
+                $order_ids = json_decode($cart->order_ids);
+                foreach($order_ids as $order_id){
+                $orderitem = OrderItem::find($order_id);
+                $product = Product::find($orderitem->product_id);
+                $response[] = $order;
+                }
+            }
+            if($response){
+            return response()->json(['orders' => $response,'success' => true, 'message' => 'Driver Orders Fetched successfully'], 200);
+            }else{
+            return response()->json(['success' => false, 'message' => 'Error Fetching Driver Orders'], 422);
+            }
+        }
+
 
       public function get_vendors(Request $request)
     {
@@ -964,8 +1012,19 @@ public function driver_signin(Request $request)
             $cart = Cart::where('user_id', $user->id)->first();
             $cart->tip = 0;
             $cart->promo_discount = 0;
+            $lnglimit = 77.391600;
+            if ($userLng < 0) {
+            $lngabs = -$userLng;
+            }else{
+            $lngabs = $userLng;   
+            }
+            if($lngabs > $lnglimit){
+            $cart->delivery_charges = 7.00; 
+            }else{
+            $cart->delivery_charges = 5.00;   
+            }
             $cart->discount = 0;
-            $cart->delivery_charges = $deliveryDistance * 0.05;
+            // $cart->delivery_charges = $deliveryDistance * 0.05;
             $cart->net_price = $cart->subtotal + $cart->service_charges + $cart->tip + $cart->delivery_charges + $cart->tax - $cart->discount - $cart->promo_discount;
             $cart->delivery_distance = $deliveryDistance;
             $cart->delivery_address = $address_id;
@@ -1139,7 +1198,7 @@ public function driver_signin(Request $request)
             $order->driver_distance = $totaldriverdistance;
             $order->driver_payment = $totaldriverdistance * 0.05;
             $order->delivery_stage = 2;
-            $drivers = Driver::where('offered_order',$driver->offered_order)->get();
+            $drivers = Driver::where('user_id','!=',$user->id)->where('offered_order',$driver->offered_order)->get();
             foreach($drivers as $driver){
                 $driver->offered_order = NULL;
                 $driver->save();
@@ -1214,8 +1273,22 @@ public function driver_signin(Request $request)
     public function get_current_order(Request $request)
     {
             $user = Auth::user();
-            $driver = Driver::where('user_id',$user->id)->first();
-            $order = Order::find($driver->offered_order);
+            $order = Order::where('buyer_id',$user->id)->where('order_status','active')->first();
+            if($order){
+            $driver = Driver::find($order->driver_id);
+            }else{
+                return response()->json([
+                'success' => false,
+                'message' => 'Order Not Found'
+            ], 404);
+            }
+            $order = Order::where('buyer_id',$user->id)->where('order_status','active')->first();
+            $order->buyer = User::find($order->buyer_id);
+            $order->buyer->address = UserAddress::find($order->buyer->address_id);
+            if($driver){
+            $order->driver = $driver;
+            }
+            $order->vendor = Business::find($order->vendor_id);
             if($order){
             return response()->json(['order' => $order,
                 'success' => true,
@@ -1335,7 +1408,6 @@ public function driver_signin(Request $request)
         $business = Business::where('user_id',$user->id)->first();
         $business->promo_images = json_decode($business->promo_images);
         $products = Product::where('business_id',$business->id)->get();
-      
         if($products){
         foreach($products as $product){
         $product->business_id = intval($product->business_id);

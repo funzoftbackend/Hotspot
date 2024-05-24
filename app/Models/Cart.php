@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\Product;
+use App\Models\OrderItem;
 class Cart extends Authenticatable
 {
     use  HasFactory, Notifiable;
@@ -20,7 +20,7 @@ class Cart extends Authenticatable
     protected $table="carts";
     protected $fillable = [
         'user_id',
-        'order_ids ',
+        'order_ids',
         'subtotal ',
         'service_charges',
         'delivery_charges',
@@ -37,4 +37,5 @@ class Cart extends Authenticatable
     {
         return $this->hasone(User::class, 'id', 'user_id');
     }
+ 
 }

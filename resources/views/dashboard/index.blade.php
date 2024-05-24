@@ -47,7 +47,7 @@
                         </a>
                     </div>
                     <div class="col-lg-3 col-md-6 col-6 mb-4">
-                        <a href="">
+                        <a href="{{ route('dashboard_drivers.index')}}">
                             <div class="card">
                                 <div class="card-body text-center">
                                     <i class="bi bi-truck display-4 text-success mt-5 "></i>
@@ -58,7 +58,7 @@
                         </a>
                     </div>
                     <div class="col-lg-3 col-md-6 col-6 mb-4">
-                        <a href="">
+                        <a href="{{ route('business.index')}}">
                             <div class="card">
                                 <div class="card-body text-center">
                                     <i class="bi bi-building display-4 text-success mt-5"></i>

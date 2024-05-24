@@ -58,10 +58,11 @@ class UserController extends Controller
     }
     
 
-    public function show(User $user)
+    public function show()
     {
-        $user = Auth::user();
-        return view('user.show', compact('user'),'user');
+        $user_id = $_GET['user_id'];
+        $user = User::find($user_id);
+        return view('user.show', compact('user'));
     }
 
     public function edit()

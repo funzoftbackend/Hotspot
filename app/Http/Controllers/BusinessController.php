@@ -57,52 +57,58 @@ class BusinessController extends Controller
         return redirect()->route('business.index')->with('success', 'Business created successfully.');
     }
 
-    public function edit()
+    // public function edit()
+    // {
+    //     $user = Auth::user();
+    //     $id = $_GET['business_id'];
+    //     $business = Business::findOrFail($id);
+    //     return view('business.edit', compact('business','user'));
+    // }
+  public function show()
     {
+        $business_id = $_GET['business_id'];
+        $business = Business::find($business_id);
         $user = Auth::user();
-        $id = $_GET['business_id'];
-        $business = Business::findOrFail($id);
-        return view('business.edit', compact('business','user'));
+        return view('business.show', compact('business','user'));
     }
+    // public function update(Request $request)
+    // {
+    //     $id = $_GET['business_id'];
+    //     $validator = Validator::make($request->all(), [
+    //         'name' => 'required|string|max:255',
+    //         'user_id' => 'required|string',
+    //         'email' => 'required|string',
+    //         'phone' => 'required|string',
+    //         'location' => 'required|string',
+    //         'delivery' => 'required|string',
+    //         'pickup' => 'required|string',
+    //         'monday' => 'required|string',
+    //         'tuesday' => 'required|string',
+    //         'wednesday' => 'required|string',
+    //         'thursday' => 'required|string',
+    //         'friday' => 'required|string',
+    //         'saturday' => 'required|string',
+    //         'sunday' => 'required|string',
+    //         'business_status' => 'required|string',
+    //         'business_image' => 'required|string',
+    //         'logo_image' => 'required|string',
+    //         'promo_images' => 'required|string',
+    //         'category_id' => 'required|string',
+    //         'rating' => 'required|string',
+    //         'delivery_time' => 'required|string',
+    //         'latitude' => 'required|string',
+    //         'longitude' => 'required|string',
+    //     ]);
 
-    public function update(Request $request)
-    {
-        $id = $_GET['business_id'];
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'user_id' => 'required|string',
-            'email' => 'required|string',
-            'phone' => 'required|string',
-            'location' => 'required|string',
-            'delivery' => 'required|string',
-            'pickup' => 'required|string',
-            'monday' => 'required|string',
-            'tuesday' => 'required|string',
-            'wednesday' => 'required|string',
-            'thursday' => 'required|string',
-            'friday' => 'required|string',
-            'saturday' => 'required|string',
-            'sunday' => 'required|string',
-            'business_status' => 'required|string',
-            'business_image' => 'required|string',
-            'logo_image' => 'required|string',
-            'promo_images' => 'required|string',
-            'category_id' => 'required|string',
-            'rating' => 'required|string',
-            'delivery_time' => 'required|string',
-            'latitude' => 'required|string',
-            'longitude' => 'required|string',
-        ]);
+    //     if ($validator->fails()) {
+    //         return redirect()->back()->withErrors($validator)->withInput();
+    //     }
 
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
+    //     $business = Business::findOrFail($id);
+    //     $business->update($request->all());
 
-        $business = Business::findOrFail($id);
-        $business->update($request->all());
-
-        return redirect()->route('business.index')->with('success', 'Business updated successfully.');
-    }
+    //     return redirect()->route('business.index')->with('success', 'Business updated successfully.');
+    // }
 
     public function destroy($id)
     {

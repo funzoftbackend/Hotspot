@@ -63,6 +63,13 @@
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{asset('/public/assets/js/config.js')}}"></script>
   </head>
+  <style>
+     body{
+            background-image: url('{{ asset('/public/rest.jpg') }}');
+            background-size: cover;
+            background-position: center;
+        }
+</style>
 
   <body>
     <!-- Content -->
@@ -141,7 +148,7 @@
 
               <p class="text-center">
                 <span>Already have an account?</span>
-                <a href="auth-login-basic.html">
+                <a href="{{ route('login') }}">
                   <span>Sign in instead</span>
                 </a>
               </p>

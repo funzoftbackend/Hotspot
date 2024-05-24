@@ -89,20 +89,15 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('dashboard_drivers.show', ['driver_id' => $driver->id]) }}" class="btn btn-info btn-sm">View</a>
-                                    <a href="{{ route('drivers.edit', ['driver_id' => $driver->id]) }}" class="btn btn-primary btn-sm">Edit</a>
-                                    @if($driver->is_verified == 1)
-                                    @else
-                                    <form action="{{ route('dashboard_drivers.verify', $driver) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        <button type="submit" class="btn btn-info btn-sm">Verify</button>
-                                    </form>
-                                    @endif
-                                    
-                                    <form action="{{ route('dashboard_drivers.destroy', $driver) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        <button type="submit" class="btn btn-danger mt btn-sm">Delete</button>
-                                    </form>
+                                   <div class="dropdown">
+                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="{{ route('dashboard_drivers.show', ['driver_id' => $driver->id]) }}"><i class="bx bx-show me-1 text-primary"></i> View</a>
+                                                
+                                            </div>
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach

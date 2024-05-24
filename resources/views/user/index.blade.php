@@ -27,6 +27,7 @@
                                 <th>Email</th>
                                 <th>Address</th>
                                 <th>Phone</th>
+                                <th>User Type</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -51,6 +52,9 @@
                                         {{ $user->phone_number }}
                                     </td>
                                     <td>
+                                        {{ $user->user_type }}
+                                    </td>
+                                    <td>
                                         <div class="dropdown">
                                             <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
                                                 data-bs-toggle="dropdown">
@@ -58,15 +62,9 @@
                                             </button>
                                             <div class="dropdown-menu">
                                                 <a class="dropdown-item"
-                                                    href="{{ route('user.edit', ['user_id' => $user->id]) }}"><i
-                                                        class="bx bx-edit-alt me-1 text-success"></i>
-                                                    Edit
-                                                </a>
-                                                <a class="dropdown-item"
-                                                    href="{{ route('user.destroy', ['user' => $user]) }}"><i
-                                                        class="bx bx-trash me-1 text-danger"></i>
-                                                    Delete
-
+                                                    href="{{ route('user.show', ['user_id' => $user->id]) }}"><i
+                                                        class="bx bx-show-alt me-1 text-primary"></i>
+                                                    View
                                                 </a>
                                             </div>
                                         </div>

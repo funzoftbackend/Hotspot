@@ -27,6 +27,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/pickup_order', [APIController::class, 'pickup_order'])->name('pickup_order');
     Route::post('/update_driver_location', [APIController::class, 'update_driver_location'])->name('update_driver_location');
     Route::get('/get_user_addresses', [APIController::class, 'get_user_addresses'])->name('get_user_addresses');
+    Route::get('/get_product_orders', [APIController::class, 'get_product_orders'])->name('get_product_orders');
+    Route::get('/get_driver_orders', [APIController::class, 'get_driver_orders'])->name('get_driver_orders');
     Route::post('/update_profile', [APIController::class, 'update_profile'])->name('update_profile');
     Route::post('/create_hotspot', [APIController::class, 'create_hotspot'])->name('create_hotspot');
      Route::post('/place_orders', [APIController::class, 'place_order'])->name('place_order');

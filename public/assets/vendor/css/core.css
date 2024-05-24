@@ -1920,12 +1920,12 @@ progress {
 }
 
 .table-responsive {
-  /*overflow-x: auto;*/
+  overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 @media (max-width: 575.98px) {
-  .table-responsive-sm {
+  .table-responsive-sm,.table-responsive {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -14741,15 +14741,16 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   display: none !important;
 }
 
-.menu-item {
+.menu-item,.menu-item1 {
   align-items: flex-start;
   justify-content: flex-start;
 }
-.menu-item.menu-item-animating {
+.menu-item.menu-item-animating,.menu-item1.menu-item-animating {
   transition: height 0.3s ease-in-out;
 }
 
 .menu-item,
+.menu-item1,
 .menu-header,
 .menu-divider,
 .menu-block {
@@ -14782,9 +14783,9 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   flex: 0 1 auto;
   margin: 0;
 }
-.menu-item.disabled .menu-link {
-  cursor: not-allowed !important;
-}
+/*.menu-item.disabled .menu-link {*/
+/*  cursor: not-allowed !important;*/
+/*}*/
 .menu:not(.menu-no-animation) .menu-link {
   transition-duration: 0.3s;
   transition-property: color, background-color, left;
@@ -14825,6 +14826,9 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 .menu-item.open:not(.menu-item-closing) > .menu-toggle::after {
   transform: translateY(-50%) rotate(135deg);
 }
+.menu-item1.open:not(.menu-item-closing) > .menu-toggle::after {
+  transform: translateY(-50%) rotate(135deg);
+}
 .menu:not(.menu-no-animation) .menu-toggle::after {
   transition-duration: 0.3s;
   transition-property: -webkit-transform, transform;
@@ -14848,6 +14852,12 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 .menu-vertical .menu-inner > .menu-header {
   width: 16.25rem;
 }
+.menu-vertical,
+.menu-vertical .menu-block,
+.menu-vertical .menu-inner > .menu-item1,
+.menu-vertical .menu-inner > .menu-header {
+  width: 16.25rem;
+}
 .menu-vertical .menu-inner {
   flex-direction: column;
   flex: 1 1 auto;
@@ -14855,11 +14865,20 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 .menu-vertical .menu-inner > .menu-item {
   margin: 0.0625rem 0;
 }
+.menu-vertical .menu-inner > .menu-item1 {
+  margin: 0.0625rem 0;
+}
 .menu-vertical .menu-inner > .menu-item .menu-link {
+  margin: 0rem 1rem;
+}
+.menu-vertical .menu-inner > .menu-item1 .menu-link {
   margin: 0rem 1rem;
 }
 .menu-vertical .menu-item .menu-link,
 .menu-vertical .menu-block {
+  padding: 0.625rem 1rem;
+}
+.menu-vertical .menu-item1 .menu-link{
   padding: 0.625rem 1rem;
 }
 .menu-vertical .menu-header {
@@ -14876,6 +14895,18 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   padding-right: calc(1rem + 1.26em);
 }
 .menu-vertical .menu-item .menu-toggle::after {
+  right: 1rem;
+}
+.menu-vertical .menu-item1 .menu-link {
+  font-size: 0.9375rem;
+}
+.menu-vertical .menu-item1.active:not(.open) > .menu-link {
+  font-weight: 500;
+}
+.menu-vertical .menu-item1 .menu-toggle {
+  padding-right: calc(1rem + 1.26em);
+}
+.menu-vertical .menu-item1 .menu-toggle::after {
   right: 1rem;
 }
 .menu-vertical .menu-divider {
@@ -14927,7 +14958,13 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 .menu-collapsed:not(:hover) .menu-inner > .menu-item {
   width: 5.25rem;
 }
+.menu-collapsed:not(:hover) .menu-inner > .menu-item1 {
+  width: 5.25rem;
+}
 .menu-collapsed:not(:hover) .menu-inner > .menu-item > .menu-link {
+  padding-left: 1rem;
+}
+.menu-collapsed:not(:hover) .menu-inner > .menu-item > .menu-link1 {
   padding-left: 1rem;
 }
 .menu-collapsed:not(:hover) .menu-inner > .menu-header,
@@ -14965,6 +15002,12 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   white-space: nowrap;
   opacity: 0;
 }
+.menu-collapsed:not(:hover) .menu-inner > .menu-item1 div:not(.menu-block) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0;
+}
 .menu-collapsed:not(:hover) .menu-inner > .menu-item > .menu-sub,
 .menu-collapsed:not(:hover) .menu-inner > .menu-item.open > .menu-sub {
   display: none;
@@ -14972,7 +15015,16 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 .menu-collapsed:not(:hover) .menu-inner > .menu-item > .menu-toggle::after {
   display: none;
 }
+.menu-collapsed:not(:hover) .menu-inner > .menu-item1 > .menu-toggle::after {
+  display: none;
+}
 .menu-collapsed:not(:hover) .menu-inner > .menu-item > .menu-link .menu-icon {
+  margin-left: -2rem;
+  width: 5.25rem;
+  text-align: center;
+  margin-right: 0;
+}
+.menu-collapsed:not(:hover) .menu-inner > .menu-item1 > .menu-link .menu-icon {
   margin-left: -2rem;
   width: 5.25rem;
   text-align: center;
@@ -15330,7 +15382,13 @@ html:not(.layout-footer-fixed) .content-wrapper {
   transition: none !important;
   animation: none !important;
 }
-
+.layout-no-transition .layout-menu, .layout-no-transition .layout-menu .menu, .layout-no-transition .layout-menu .menu-item1,
+.layout-no-transition .layout-menu-horizontal,
+.layout-no-transition .layout-menu-horizontal .menu,
+.layout-no-transition .layout-menu-horizontal .menu-item1 {
+  transition: none !important;
+  animation: none !important;
+}
 @media (max-width: 1199.98px) {
   .layout-transitioning .layout-overlay {
     animation: menuAnimation 0.3s;
