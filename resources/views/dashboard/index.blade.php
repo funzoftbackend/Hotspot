@@ -34,6 +34,7 @@
         </div>
         <div class="col-lg-12 order-1">
                 <div class="row">
+                    @if($user->user_type == "Admin")
                     <div class="col-lg-3 col-md-6 col-6 mb-4">
                         <a href="{{ route('user.index') }}">
                             <div class="card">
@@ -69,7 +70,20 @@
                             </div>
                         </a>
                     </div>
-                    
+                     @else
+                     <div class="col-lg-3 col-md-6 col-6 mb-4">
+                        <a href="{{ route('order.index')}}">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-cart display-4 text-success mt-5"></i>
+                                    <span
+                                        class="fw-medium d-block mb-3  text-dark">Orders</span>
+                                    <h3 class="card-title">{{ $totalorders }}</h3>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                     @endif
                 </div>
             </div>
 

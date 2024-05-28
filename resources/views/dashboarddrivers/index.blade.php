@@ -12,10 +12,7 @@
         <h5 class="card-header">
 
            Drivers
-            <div class="text-end">
-                <a href="{{ route('dashboard_drivers.create') }}"
-                    class="btn btn-outline-primary">Create Drivers</a>
-            </div>
+            
         </h5>
 
         <div class="col-xl-12">

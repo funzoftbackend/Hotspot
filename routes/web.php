@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ResetPasswordController;
@@ -54,6 +55,12 @@ Route::get('/logout', function () {
     return redirect()->route('login');
 })->name('logout');
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/order-create', [OrderController::class, 'create'])->name('order.create');
+    Route::post('/order-store', [OrderController::class, 'store'])->name('order.store');
+    Route::get('/orders', [OrderController::class, 'index'])->name('order.index');
+    Route::get('/order', [OrderController::class, 'show'])->name('order.show');
+    Route::put('/update/{order}', [OrderController::class, 'update'])->name('order.update');
+    Route::get('/delete-order/{order}', [OrderController::class, 'destroy'])->name('order.destroy');
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::get('/user-create', [UserController::class, 'create'])->name('user.create');
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
@@ -82,5 +89,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Route::post('driver-update/{driver}', [DriverController::class, 'update'])->name('drivers.update');
     Route::post('driver-delete/{driver}', [DriverController::class, 'destroy'])->name('drivers.destroy');
     Route::post('dashboard-driver-delete/{driver}', [DriverController::class, 'dashboard_drivers_destroy'])->name('dashboard_drivers.destroy');
-    
+    Route::post('/wallet-store', [DriverController::class, 'wallet_store'])->name('wallet.store');
 });

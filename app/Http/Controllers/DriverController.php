@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Mail\VerifyMail;
 use App\Mail\UnverifyMail;
+use App\Models\DriverWallet;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 class DriverController extends Controller
@@ -83,6 +84,21 @@ class DriverController extends Controller
         Driver::create($validated);
         return redirect()->route('drivers.index')->with('success', 'Driver created successfully.');
     }
+    public function wallet_store(Request $request){
+        $validator = Validator::make($request->all(), [
+            'driver_id' => 'required',
+            'amount' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => 'false','message' => $validator->errors()->first()], 422);
+       }
+        $wallet = new DriverWallet();
+        $wallet->driver_id = $request->driver_id;
+        $wallet->action = "drawn";
+        $wallet->amount = $request->amount;
+        $wallet->save();
+        return redirect()->route('dashboard_drivers.show',['driver_id' => $request->driver_id])->with('success', 'Payment Done successfully.');
+    }
     public function dashboard_driver_store(Request $request)
     {
         $validated = $request->validate([
@@ -134,10 +150,19 @@ class DriverController extends Controller
     }
     public function dashboard_driver_show(Driver $driver)
     {
-         $driver_id = $_GET['driver_id'];
+        $driver_id = $_GET['driver_id'];
         $driver = Driver::find($driver_id);
+        $deliveredwallets = DriverWallet::where('driver_id',$driver->id)->where('action','delivery')->get();
+        $drawnwallets = DriverWallet::where('driver_id',$driver->id)->where('action','drawn')->get();
+        $amount = 0;
+        foreach($deliveredwallets as $delwallet){
+            $amount += $delwallet->amount;
+        }
+        foreach($drawnwallets as $drnwallet){
+            $amount -= $drnwallet->amount;
+        }
         $user = Auth::user();
-        return view('dashboarddrivers.show', compact('driver','user'));
+        return view('dashboarddrivers.show', compact('driver','user','amount'));
     }
     public function dashboard_driver_verify()
     {

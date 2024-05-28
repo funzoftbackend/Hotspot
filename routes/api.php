@@ -23,11 +23,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/update_availablity', [APIController::class, 'update_availablity'])->name('update_availablity');
     Route::post('/accept_reject_order', [APIController::class, 'accept_reject_order'])->name('accept_reject_order');
     Route::post('/dropoff_order', [APIController::class, 'dropoff_order'])->name('dropoff_order');
-   
+    Route::get('/get_driver_wallet', [APIController::class, 'get_driver_wallet'])->name('get_driver_wallet');
+    Route::get('/get_driver_wallet_history', [APIController::class, 'get_driver_wallet_history'])->name('get_driver_wallet_history');
     Route::post('/pickup_order', [APIController::class, 'pickup_order'])->name('pickup_order');
     Route::post('/update_driver_location', [APIController::class, 'update_driver_location'])->name('update_driver_location');
     Route::get('/get_user_addresses', [APIController::class, 'get_user_addresses'])->name('get_user_addresses');
     Route::get('/get_product_orders', [APIController::class, 'get_product_orders'])->name('get_product_orders');
+     Route::get('/get_last_order_status', [APIController::class, 'get_last_order_status'])->name('get_last_order_status');
     Route::get('/get_driver_orders', [APIController::class, 'get_driver_orders'])->name('get_driver_orders');
     Route::post('/update_profile', [APIController::class, 'update_profile'])->name('update_profile');
     Route::post('/create_hotspot', [APIController::class, 'create_hotspot'])->name('create_hotspot');

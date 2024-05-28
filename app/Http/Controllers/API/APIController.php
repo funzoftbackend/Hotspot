@@ -11,6 +11,7 @@ use App\Models\OrderItem;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Driver;
+use App\Models\DriverWallet;
 use App\Models\UserAddress;
 use App\Models\Category;
 use App\Models\PromotedBusiness;
@@ -54,6 +55,45 @@ class APIController extends Controller
             return response()->json(['success' => 'true','message' => 'Login Successful','token' => $token], 200);
         } else {
             return response()->json(['success' => 'false','message' => 'Invalid Email or Password'], 401);
+        }
+    }
+     public function get_driver_wallet()
+    {
+        $user = Auth::user();
+        $driver = Driver::where('user_id',$user->id)->first();
+        $deliveredwallets = DriverWallet::where('driver_id',$driver->id)->where('action','delivery')->get();
+        $drawnwallets = DriverWallet::where('driver_id',$driver->id)->where('action','drawn')->get();
+        $amount = 0;
+        foreach($deliveredwallets as $delwallet){
+            $amount += $delwallet->amount;
+        }
+        foreach($drawnwallets as $drnwallet){
+            $amount -= $drnwallet->amount;
+        }
+        
+        if($amount){
+            return response()->json(['success' => 'true','message' => 'Wallet Amount Fetched Successfully','total_amount' => $amount], 200);
+        } 
+        elseif($amount == 0){
+             return response()->json(['success' => 'true','message' => 'Wallet Amount Fetched Successfully','total_amount' => $amount], 200);
+            }
+        else {
+            return response()->json(['success' => 'false','message' => 'Error Fetching Wallet Amount'], 401);
+        }
+    }
+    public function get_driver_wallet_history()
+    {
+        $user = Auth::user();
+        $driver = Driver::where('user_id',$user->id)->first();
+        $wallets = DriverWallet::where('driver_id',$driver->id)->get();
+        foreach($wallets as $wallet){
+            $wallet->epoch_date_time = $wallet->created_at->timestamp;
+        }
+        if($wallets){
+            return response()->json(['success' => 'true','message' => 'Wallet Amount Fetched Successfully','wallets' => $wallets], 200);
+        } 
+        else {
+            return response()->json(['success' => 'false','message' => 'Error Fetching Wallets'], 401);
         }
     }
     public function signin_with_phone_number(Request $request)
@@ -653,7 +693,7 @@ class APIController extends Controller
         if($existingorderitemproduct){
              return response()->json(["success" => false, "message" => "Product is already in your cart"], 422);
         }
-        $existingorderitem = OrderItem::where('user_id',$user->id)->first();
+        $existingorderitem = OrderItem::where('user_id',$user->id)->where('status','created')->first();
         if($existingorderitem){
         $existingproduct = Product::find($existingorderitem->product_id);
         $product = Product::find($request->product_id);
@@ -665,7 +705,6 @@ class APIController extends Controller
         }
         }
         $orderitems = new OrderItem();
-        
         $orderitems->product_id = $request->product_id;
         $orderitems->user_id = $user->id;
         $orderitems->quantity = $request->quantity;
@@ -702,7 +741,7 @@ class APIController extends Controller
             $cart->save();
         }
         }
-         if(empty($cart->order_ids)){
+         if(count($orderItemIds) < 1 && !empty($cart)){
             $cart->delete();
         }
         $delete = $orderItem->delete();
@@ -775,6 +814,19 @@ class APIController extends Controller
             return response()->json(['success' => false, 'message' => 'Error Verifying Promo Code'], 422);
         }
     }
+    public function get_last_order_status(){
+        $user = Auth::user();
+        $order = Order::where('buyer_id',$user->id)->latest()->first();
+        if($order){
+            return response()->json([
+                'order_status' => $order->order_status,
+                'success' => true,
+                'message' => 'Last Order Status Fetched Successfully'
+            ], 200);
+        }else{
+           return response()->json(['success' => false, 'message' => 'Error Fetching Order Status'], 422);  
+        }
+    }
 
        public function submit_cart(Request $request)
     {
@@ -813,7 +865,9 @@ class APIController extends Controller
                 $order->product->featured = intval($order->product->featured);
                 $order->product->popularity = intval($order->product->popularity);
                 $business = Business::find($product->business_id);
-                $subtotal += $product->price * $quantities[$index];
+                $discount = str_replace('%', '', $product->discount);
+                $discounted_price = $product->price * (1-($discount / 100));
+                $subtotal += $discounted_price * $quantities[$index];
             }
             $existingcart->subtotal = $subtotal;
             $existingcart->service_charges = $subtotal * 0.02;
@@ -900,7 +954,9 @@ class APIController extends Controller
                 $order->product->featured = intval($order->product->featured);
                 $order->product->popularity = intval($order->product->popularity);
                 $business = Business::find($product->business_id);
-                $subtotal += $product->price * $quantities[$index];
+                $discount = str_replace('%', '', $product->discount);
+                $discounted_price = $product->price * (1-($discount / 100));
+                $subtotal += $discounted_price * $quantities[$index];
             }
             $cart->subtotal = $subtotal;
             $cart->service_charges = $subtotal * 0.02;
@@ -988,7 +1044,6 @@ class APIController extends Controller
             $userLng = 0; 
             }
             $cart = Cart::where('user_id', $user->id)->where('status', 'created')->first();
-            
             if(empty($cart)){
                 return response()->json(['success' => false, 'message' => 'cart not found'], 404);
             }
@@ -1009,7 +1064,7 @@ class APIController extends Controller
             else{
                 $deliveryDistance = 0;
             }
-            $cart = Cart::where('user_id', $user->id)->first();
+            $cart = Cart::where('user_id', $user->id)->where('status', 'created')->first();
             $cart->tip = 0;
             $cart->promo_discount = 0;
             $lnglimit = 77.391600;
@@ -1024,7 +1079,6 @@ class APIController extends Controller
             $cart->delivery_charges = 5.00;   
             }
             $cart->discount = 0;
-            // $cart->delivery_charges = $deliveryDistance * 0.05;
             $cart->net_price = $cart->subtotal + $cart->service_charges + $cart->tip + $cart->delivery_charges + $cart->tax - $cart->discount - $cart->promo_discount;
             $cart->delivery_distance = $deliveryDistance;
             $cart->delivery_address = $address_id;
@@ -1032,7 +1086,7 @@ class APIController extends Controller
             $cart->save();
             }else{
             $user = Auth::user();
-            $cart = Cart::where('user_id', $user->id)->first();
+            $cart = Cart::where('user_id', $user->id)->where('status', 'created')->first();
             $cart->delivery_charges = 0;
             $cart->tip = 0;
             $cart->discount = 0;
@@ -1111,6 +1165,13 @@ class APIController extends Controller
             $order = Order::find($driver->offered_order);
             $order->delivery_stage = 4;
             $order->order_status = 'delivered';
+            $driver->offered_order = NULL;
+            $driver->save();
+            $wallet = new DriverWallet();
+            $wallet->driver_id = $driver->id;
+            $wallet->action = "delivery";
+            $wallet->amount = $order->driver_payment;
+            $wallet->save();
             if($order->save()){
             return response()->json([
                 'success' => true,
@@ -1277,12 +1338,9 @@ class APIController extends Controller
             if($order){
             $driver = Driver::find($order->driver_id);
             }else{
-                return response()->json([
-                'success' => false,
-                'message' => 'Order Not Found'
-            ], 404);
+              $order = Order::where('buyer_id',$user->id)->where('order_status','delivered')->latest()->first();
+              $driver = Driver::find($order->driver_id);
             }
-            $order = Order::where('buyer_id',$user->id)->where('order_status','active')->first();
             $order->buyer = User::find($order->buyer_id);
             $order->buyer->address = UserAddress::find($order->buyer->address_id);
             if($driver){

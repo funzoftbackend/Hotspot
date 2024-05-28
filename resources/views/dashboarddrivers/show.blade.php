@@ -4,6 +4,14 @@
         font-weight:900;
         font-size:25px;
     }
+    .modal-title{
+        font-weight:900;
+    }
+    @media(max-width:578px){
+    .btn{
+        margin-top:10%;
+    }
+    }
 </style>
 @section('content')
 <div class="container mt-5">
@@ -109,7 +117,7 @@
                     @else
                     <form action="{{ route('dashboard_drivers.verify', ['driver_id' => $driver->id]) }}" method="POST" style="display:inline;">
                         @csrf
-                        <button type="submit" class="btn btn-info btn-sm">Verify</button>
+                        <button type="submit" class="btn btn-info">Verify</button>
                     </form>
                     @endif
                     @if($driver->is_verified == 1)
@@ -134,12 +142,40 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-                                            <button type="button" class="btn btn-danger mt-2" onclick="submitRejectForm({{ $driver->id }})">Confirm Unverification</button>
+                                            <button type="button" class="btn btn-danger mt-2">Confirm Unverification</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                     @endif
+                        <button type="button" class="btn btn-success pay-button" data-toggle="modal" data-target="#payModal_{{ $driver->id }}">Pay</button>
+                        <div id="payModal_{{ $driver->id }}" class="modal" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Total Payment Pending</h5>
+
+                                   <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="border: none; background: none;">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="POST" id="reject-form-{{ $driver->id }}" action="{{ route('wallet.store') }}">
+                                    @csrf
+                                    <input type="hidden" name="driver_id" value="{{ $driver->id }}">
+                                    <div class="form-group">
+                                        <p><strong>{{$amount}}</strong></p>
+                                        <input type="text" id="amount" max = "{{$amount}}" class="form-control amount" name="amount" placeholder="Amount" required>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-success mt-2" >Pay</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -153,17 +189,21 @@
             var driverId = $(this).closest('.card').find('input[name="driver_id"]').val();
             $('#rejectModal_' + driverId).modal('show');
         });
-    
+        $('.pay-button').on('click', function() {
+            var driverId = $(this).closest('.card').find('input[name="driver_id"]').val();
+            $('#payModal_' + driverId).modal('show');
+        });
+
         // Close modal when cancel button is clicked
         $('.close').on('click', function() {
             $(this).closest('.modal').modal('hide');
         });
-    
+
         // Close modal when cancel primary button is clicked
         $('.btn-primary').on('click', function() {
             $(this).closest('.modal').modal('hide');
         });
-    
+
         // Validate rejection reason before form submission
         $(document).on('click', '.btn-danger.mt-2', function(e)  {
             e.preventDefault();
@@ -171,6 +211,20 @@
             var reason = reasonInput.val().trim();
             if (!reason) {
                 alert('Please enter a unverification reason first.');
+            } else {
+                $(this).closest('.modal').find('form').submit();
+            }
+        });
+        $(document).on('click', '.btn-success.mt-2', function(e)  {
+            e.preventDefault();
+            var amountInput = $(this).closest('.modal').find('.amount');
+            var amount = amountInput.val().trim();
+            if (amount > {{$amount}}) {
+                alert('Amount Exceeds total pending amount.');
+                exit();
+            }
+            if (!amount) {
+                alert('Please enter an Amount first.');
             } else {
                 $(this).closest('.modal').find('form').submit();
             }

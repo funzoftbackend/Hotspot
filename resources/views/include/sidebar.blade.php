@@ -23,6 +23,7 @@
                     <div data-i18n="Analytics"> Dashboard</div>
                 </a>
             </li>
+            @if($user->user_type == "Admin")
             <li
                 class="menu-item {{ Request::is('businesses') || Request::is('edit-business') ? 'active' : '' }}">
                 <a href="{{ route('business.index') }}" class="menu-link menu-toggle">
@@ -38,8 +39,6 @@
                     <div data-i18n="Analytics"> Users</div>
                 </a>
             </li>
-
-            <!-- Layouts -->
             <li
                 class="menu-item {{ Request::is('dashboard-drivers') || Request::is('dashboard-driver-show') || Request::is('driver-edit') ? 'active' : '' }}">
                 <a href="{{ route('dashboard_drivers.index') }}" class="menu-link menu-toggle">
@@ -47,7 +46,15 @@
                     <div data-i18n="Layouts">Drivers</div>
                 </a>
             </li>
-
+            @else
+            <li
+                class="menu-item {{ Request::is('orders') || Request::is('order') ? 'active' : '' }}">
+                <a href="{{ route('order.index') }}" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-cart"></i>
+                    <div data-i18n="Layouts">Orders</div>
+                </a>
+            </li>
+            @endif
     </ul>
 </aside>
 <!-- / Menu -->
