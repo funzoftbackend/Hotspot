@@ -17,6 +17,12 @@ use App\Http\Controllers\API\ForgotPasswordController;
 */
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('create-review', [APIController::class, 'create_review'])->name('create_review');
+    Route::post('create-post', [APIController::class, 'create_post'])->name('create_post');
+    Route::post('create-comment', [APIController::class, 'create_comment'])->name('create_comment');
+    Route::post('make-favourite', [APIController::class, 'make_favourite'])->name('make_favourite');
+    Route::get('get-community-feed', [APIController::class, 'get_community_feed'])->name('get_community_feed');
+    Route::post('update-fcm-token', [APIController::class, 'storeToken'])->name('update_fcm_token');
     Route::get('/get_profile', [APIController::class, 'get_profile'])->name('get_profile');
     Route::get('/get_current_order', [APIController::class, 'get_current_order'])->name('get_current_order');
     Route::get('/get_last_offer', [APIController::class, 'get_last_offer'])->name('get_last_offer');

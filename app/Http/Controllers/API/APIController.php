@@ -14,11 +14,17 @@ use App\Models\Driver;
 use App\Models\DriverWallet;
 use App\Models\UserAddress;
 use App\Models\Category;
+use App\Models\CommunityComment;
+use App\Models\CommunityPost;
+use App\Models\Hashtag;
+use App\Models\Favourite;
+use App\Models\Review;
 use App\Models\PromotedBusiness;
 use App\Models\Search;
 use App\Models\Business;
 use Illuminate\Support\Facades\Session;
 use App\Models\Product;
+use App\Traits\Firebase;
 use Illuminate\Validation\Rule;
 use App\Models\PromoCode;
 use Twilio\Rest\Client;
@@ -27,7 +33,32 @@ use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Facades\Socialite;
 class APIController extends Controller
 {
-
+     use Firebase;
+     public function sendNotification($buyer)
+    {
+        $notificationMessage = 'Hot and prepared! Your driver is currently retrieving your order.';
+        $notification = [
+            'title' => 'Track Order',
+            'body' => $notificationMessage,
+            'icon' => 'myIcon',
+            'sound' => 'mySound'
+        ];
+        $extraNotificationData = [
+            "message" => $notification,
+            "moredata" => 'dd'
+        ];
+        $fcmNotification = [
+            'to' => $buyer->fcm_token,
+            'notification' => $notification,
+            'data' => $extraNotificationData
+        ];
+        $response = $this->firebaseNotification($fcmNotification);
+        if ($response) {
+            return response()->json(['success' => true, 'message' => 'Notification sent successfully'], 200);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Failed to send notification'], 500);
+        }
+    }
     public function signin_with_email(Request $request)
     {
        
@@ -81,6 +112,18 @@ class APIController extends Controller
             return response()->json(['success' => 'false','message' => 'Error Fetching Wallet Amount'], 401);
         }
     }
+     public function storeToken(Request $request){
+       $validateData = Validator::make($request->all(), [
+            'fcm_token' => 'required',
+       ]);
+       if ($validateData->fails()) {
+        return response()->json(['message' => $validateData->errors()->first()], 401);
+       }
+        $user = auth()->user();
+        $user->fcm_token = $request->fcm_token;
+        $user->save();
+        return response()->json(['message' => 'Token Updated Successfully'], 200);
+    }
     public function get_driver_wallet_history()
     {
         $user = Auth::user();
@@ -96,9 +139,200 @@ class APIController extends Controller
             return response()->json(['success' => 'false','message' => 'Error Fetching Wallets'], 401);
         }
     }
-    public function signin_with_phone_number(Request $request)
-{
+    public function create_review(Request $request)
+    {
             $validator = Validator::make($request->all(), [
+            'business_id' => 'required',
+            'reviews_text' => 'required',
+            'reviews_rating' => 'required',
+            // 'epoch_date' => 'required',
+            'media_urls' => 'required',
+            'reviews_hashtags' => 'required',
+            ]);
+    
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                return response()->json(['success' => false, 'message' => $errors->first()], 422);
+            }
+            $user = Auth::user();
+            $review = new Review();
+            $review->business_id = $request->business_id;
+            $review->creator_id = $user->id;
+            $review->reviews_text = $request->reviews_text;
+            $review->reviews_rating = $request->reviews_rating;
+            // $review->epoch_date = $request->epoch_date;
+            $review->media_urls = $request->media_urls;
+            $review->reviews_hashtags = $request->reviews_hashtags;
+            $review->save();
+            if($review){
+                return response()->json(['success' => true, 'message' => 'Review Saved Successfully'], 200);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Error Saving Review'], 422);
+            }
+    }
+    public function create_comment(Request $request)
+    {
+       $validator = Validator::make($request->all(), [
+            'comment_text' => 'required',
+            // 'comment_epoch_date' => 'required',
+            'comment_hashtags' => 'required',
+            'type' => 'required',
+            'id' => 'required',
+            ]);
+            
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                return response()->json(['success' => false, 'message' => $errors->first()], 422);
+            }
+            $user = Auth::user();
+            $comment = new CommunityComment();
+            $comment->commentor_id = $user->id;
+            $comment->comment_text = $request->comment_text;
+            // $comment->comment_epoch_date = $request->comment_epoch_date;
+            $comment->comment_hashtags = $request->comment_hashtags;
+            if($request->type == 'POST'){
+              $comment->post_id = $request->id;  
+            }else{
+            $comment->review_id = $request->id;
+            }
+            $comment->save();
+            if($comment){
+                return response()->json(['success' => true, 'message' => 'Comment Saved Successfully'], 200);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Error Saving Comment'], 422);
+            }
+    }
+    public function create_post(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'post_text' => 'required',
+            // 'post_epoch_date' => 'required',
+            'post_media_urls' => 'required',
+            'post_hashtags' => 'required',
+            ]);
+            
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                return response()->json(['success' => false, 'message' => $errors->first()], 422);
+            }
+            $user = Auth::user();
+            $post = new CommunityPost();
+            $post->creator_id = $user->id;
+            $post->post_text = $request->post_text;
+            // $post->post_epoch_date = $request->post_epoch_date;
+            $post->post_media_urls = $request->post_media_urls;
+            $post->post_hash_tags = $request->post_hashtags;
+            $post->save();
+            if($post){
+                return response()->json(['success' => true, 'message' => 'Post Saved Successfully'], 200);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Error Saving Post'], 422);
+            }
+    }
+    public function make_favourite(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'type' => 'required',
+            'id' => 'required',
+            'is_favourite' => 'required'
+            ]);
+            
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                return response()->json(['success' => false, 'message' => $errors->first()], 422);
+            }
+            $user = Auth::user();
+            $favourite = new Favourite();
+            if($request->type == 'POST'){
+              $favourite->post_id = $request->id;  
+            }elseif($request->type == 'REVIEW'){
+              $favourite->review_id = $request->id;  
+            }else{
+              $favourite->comment_id = $request->id;   
+            }
+            $favourite->liked_unliked_by = $user->id; 
+            $favourite->is_favourite = $request->is_favourite;
+            $favourite->save();
+            if($favourite){
+                return response()->json(['success' => true, 'message' => 'Favourites Saved Successfully'], 200);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Error Saving Favourites'], 422);
+            }
+    }
+    public function get_community_feed()
+    {
+        $reviews = DB::table('reviews')
+            ->leftJoin('review_post_favourites', 'reviews.id', '=', 'review_post_favourites.review_id')
+            ->leftJoin('community_comments', 'reviews.id', '=', 'community_comments.review_id')
+            ->select(
+                DB::raw("'REVIEW' as type"),
+                'reviews.id',
+                'reviews.business_id',
+                'reviews.creator_id',
+                'reviews.reviews_text as text',
+                'reviews.media_urls',
+                'reviews.reviews_hashtags as hashtags',
+                DB::raw('UNIX_TIMESTAMP(reviews.created_at) as epoch_date'),
+                DB::raw('GROUP_CONCAT(review_post_favourites.id) as favourite_ids'),
+                DB::raw('GROUP_CONCAT(review_post_favourites.is_favourite) as is_favourite'),
+                DB::raw('GROUP_CONCAT(community_comments.id) as comment_ids'),
+                DB::raw('GROUP_CONCAT(community_comments.comment_text) as comment_texts')
+            )
+            ->groupBy('reviews.id', 'reviews.business_id', 'reviews.creator_id', 'reviews.reviews_text', 'reviews.media_urls', 'reviews.reviews_hashtags', 'reviews.created_at')
+            ->orderBy('reviews.created_at', 'desc')
+            ->get();
+        $posts = DB::table('community_posts')
+            ->leftJoin('review_post_favourites', 'community_posts.id', '=', 'review_post_favourites.post_id')
+            ->leftJoin('community_comments', 'community_posts.id', '=', 'community_comments.post_id')
+            ->select(
+                DB::raw("'POST' as type"),
+                'community_posts.id',
+                DB::raw('NULL as business_id'),
+                'community_posts.creator_id',
+                'community_posts.post_text as text',
+                'community_posts.post_media_urls as media_urls',
+                'community_posts.post_hash_tags as hashtags',
+                DB::raw('UNIX_TIMESTAMP(community_posts.created_at) as epoch_date'),
+                DB::raw('GROUP_CONCAT(review_post_favourites.id) as favourite_ids'),
+                DB::raw('GROUP_CONCAT(review_post_favourites.is_favourite) as is_favourite'),
+                DB::raw('GROUP_CONCAT(community_comments.id) as comment_ids'),
+                DB::raw('GROUP_CONCAT(community_comments.comment_text) as comment_texts')
+            )
+            ->groupBy('community_posts.id', 'community_posts.creator_id', 'community_posts.post_text', 'community_posts.post_media_urls', 'community_posts.post_hash_tags', 'community_posts.created_at')
+            ->orderBy('community_posts.created_at', 'desc')
+            ->get();
+        $feed = $reviews->merge($posts)->sortByDesc('epoch_date')->values();
+        $processedFeed = $feed->map(function($item) {
+            return [
+                'type' => $item->type,
+                'id' => $item->id,
+                'business_id' => $item->business_id,
+                'creator_id' => $item->creator_id,
+                'text' => $item->text,
+                'media_urls' => $item->media_urls,
+                'hashtags' => $item->hashtags,
+                'epoch_date' => $item->epoch_date,
+                'favourites' => [
+                    'ids' => $item->favourite_ids ? explode(',', $item->favourite_ids) : [],
+                    'is_favourites' => $item->is_favourite ? explode(',', $item->is_favourite) : []
+                ],
+                'comments' => [
+                    'ids' => $item->comment_ids ? explode(',', $item->comment_ids) : [],
+                    'comment_texts' => $item->comment_texts ? explode(',', $item->comment_texts) : []
+                ]
+            ];
+        });
+    
+        return response()->json($processedFeed);
+    }
+
+
+
+
+
+    public function signin_with_phone_number(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             'phone_number' => 'required',
         ]);
     
@@ -161,6 +395,7 @@ class APIController extends Controller
             $user = User::find($driver->user_id);
             
             $request->merge(['email' => $user->email,'password' => $driver->password]);
+ 
             $credentials = $request->only('phone_number', 'password'); 
             if (Auth::attempt(['phone_number' => $credentials['phone_number'], 'password' => $credentials['password']])) {
                 $user = Auth::user();
@@ -1264,7 +1499,9 @@ class APIController extends Controller
                 $driver->offered_order = NULL;
                 $driver->save();
             }
+            
             if($order->save()){
+            $this->sendNotification($buyer);
             return response()->json([
                 'success' => true,
                 'message' => 'Order Accepted Successfully'
@@ -1709,6 +1946,18 @@ class APIController extends Controller
         $request->image_file->move(public_path('product_image'), $imageName);
         $imagePath2 = 'product_image/'.$imageName; 
         return response()->json([ 'success' => 'true','image_url'=> $imagePath2,'message' => 'Product Image Uploaded Successfully']);
+        }
+         else if($request->image_type == 'review_media'){
+        $imageName = time().'.'.$request->image_file->extension();
+        $request->image_file->move(public_path('review_media'), $imageName);
+        $imagePath2 = 'review_media/'.$imageName; 
+        return response()->json([ 'success' => 'true','image_url'=> $imagePath2,'message' => 'Review Media Uploaded Successfully']);
+        }
+         else if($request->image_type == 'post_media'){
+        $imageName = time().'.'.$request->image_file->extension();
+        $request->image_file->move(public_path('post_media'), $imageName);
+        $imagePath2 = 'post_media/'.$imageName; 
+        return response()->json([ 'success' => 'true','image_url'=> $imagePath2,'message' => 'Post Media Uploaded Successfully']);
         }
         else{
         $imageName = time().'.'.$request->image_file->extension();
