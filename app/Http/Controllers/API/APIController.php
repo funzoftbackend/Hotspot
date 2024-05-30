@@ -251,7 +251,13 @@ class APIController extends Controller
               $favourite->comment_id = $request->id;   
             }
             $favourite->liked_unliked_by = $user->id; 
-            $favourite->is_favourite = $request->is_favourite;
+            if($request->is_favourite == 1){
+            $favourite->is_favourite = 1;
+            }elseif($request->is_favourite == "NULL" || $request->is_favourite == "null"){
+            $favourite->is_favourite = NULL;
+            }else{
+            $favourite->is_favourite = 0;  
+            }
             $favourite->save();
             if($favourite){
                 return response()->json(['success' => true, 'message' => 'Favourites Saved Successfully'], 200);
@@ -261,74 +267,99 @@ class APIController extends Controller
     }
     public function get_community_feed()
     {
+        $userId = auth()->id();
+    
         $reviews = DB::table('reviews')
-            ->leftJoin('review_post_favourites', 'reviews.id', '=', 'review_post_favourites.review_id')
+            ->leftJoin('review_post_favourites', function ($join) use ($userId) {
+                $join->on('reviews.id', '=', 'review_post_favourites.review_id')
+                     ->where('review_post_favourites.liked_unliked_by', '=', $userId);
+            })
             ->leftJoin('community_comments', 'reviews.id', '=', 'community_comments.review_id')
+            ->leftJoin('users', 'users.id', '=', 'reviews.creator_id')
+            ->leftJoin('businesses', 'businesses.id', '=', 'reviews.business_id')
             ->select(
                 DB::raw("'REVIEW' as type"),
                 'reviews.id',
                 'reviews.business_id',
                 'reviews.creator_id',
+                'reviews.reviews_rating as rating',
+                'users.name',
+                'users.image',
+                'businesses.name as business_name',
                 'reviews.reviews_text as text',
                 'reviews.media_urls',
                 'reviews.reviews_hashtags as hashtags',
                 DB::raw('UNIX_TIMESTAMP(reviews.created_at) as epoch_date'),
-                DB::raw('GROUP_CONCAT(review_post_favourites.id) as favourite_ids'),
-                DB::raw('GROUP_CONCAT(review_post_favourites.is_favourite) as is_favourite'),
-                DB::raw('GROUP_CONCAT(community_comments.id) as comment_ids'),
-                DB::raw('GROUP_CONCAT(community_comments.comment_text) as comment_texts')
+                DB::raw('COUNT(DISTINCT review_post_favourites.id) as total_favourites'),
+                DB::raw('SUM(review_post_favourites.is_favourite = 1) as favourite_count'),
+                DB::raw('SUM(review_post_favourites.is_favourite = 0) as not_favourite_count'),
+                DB::raw('COUNT(DISTINCT community_comments.id) as total_comments'),
+                'review_post_favourites.is_favourite'
             )
-            ->groupBy('reviews.id', 'reviews.business_id', 'reviews.creator_id', 'reviews.reviews_text', 'reviews.media_urls', 'reviews.reviews_hashtags', 'reviews.created_at')
+            ->groupBy('reviews.id', 'reviews.business_id', 'reviews.creator_id','reviews.reviews_rating','users.name','users.image','business_name', 'review_post_favourites.is_favourite', 'reviews.reviews_text', 'reviews.media_urls', 'reviews.reviews_hashtags', 'reviews.created_at')
             ->orderBy('reviews.created_at', 'desc')
             ->get();
+    
         $posts = DB::table('community_posts')
-            ->leftJoin('review_post_favourites', 'community_posts.id', '=', 'review_post_favourites.post_id')
+            ->leftJoin('review_post_favourites', function ($join) use ($userId) {
+                $join->on('community_posts.id', '=', 'review_post_favourites.post_id')
+                     ->where('review_post_favourites.liked_unliked_by', '=', $userId);
+            })
             ->leftJoin('community_comments', 'community_posts.id', '=', 'community_comments.post_id')
+            ->leftJoin('users', 'users.id', '=', 'community_posts.creator_id')
             ->select(
+                'users.name',
+                'users.image',
+                DB::raw('NULL as business_name'),
                 DB::raw("'POST' as type"),
                 'community_posts.id',
                 DB::raw('NULL as business_id'),
+                DB::raw('NULL as rating'),
                 'community_posts.creator_id',
                 'community_posts.post_text as text',
                 'community_posts.post_media_urls as media_urls',
                 'community_posts.post_hash_tags as hashtags',
                 DB::raw('UNIX_TIMESTAMP(community_posts.created_at) as epoch_date'),
-                DB::raw('GROUP_CONCAT(review_post_favourites.id) as favourite_ids'),
-                DB::raw('GROUP_CONCAT(review_post_favourites.is_favourite) as is_favourite'),
-                DB::raw('GROUP_CONCAT(community_comments.id) as comment_ids'),
-                DB::raw('GROUP_CONCAT(community_comments.comment_text) as comment_texts')
+                DB::raw('SUM(review_post_favourites.is_favourite = 1) as favourite_count'),
+                DB::raw('SUM(review_post_favourites.is_favourite = 0) as not_favourite_count'),
+                'review_post_favourites.is_favourite',
+                DB::raw('COUNT(DISTINCT community_comments.id) as total_comments')
             )
-            ->groupBy('community_posts.id', 'community_posts.creator_id', 'community_posts.post_text', 'community_posts.post_media_urls', 'community_posts.post_hash_tags', 'community_posts.created_at')
+            ->groupBy('community_posts.id', 'community_posts.creator_id','rating' ,'users.name','users.image','business_name','review_post_favourites.is_favourite', 'community_posts.post_text', 'community_posts.post_media_urls', 'community_posts.post_hash_tags', 'community_posts.created_at')
             ->orderBy('community_posts.created_at', 'desc')
             ->get();
+    
         $feed = $reviews->merge($posts)->sortByDesc('epoch_date')->values();
         $processedFeed = $feed->map(function($item) {
+            $cleaned_urls = trim($item->media_urls, '[]');
+            $urls_array = explode(',', $cleaned_urls);
+            $cleaned_urls = trim($item->hashtags, '[]');
+            $hashtags_array = explode(',', $cleaned_urls);
             return [
                 'type' => $item->type,
                 'id' => $item->id,
                 'business_id' => $item->business_id,
                 'creator_id' => $item->creator_id,
-                'text' => $item->text,
-                'media_urls' => $item->media_urls,
-                'hashtags' => $item->hashtags,
-                'epoch_date' => $item->epoch_date,
-                'favourites' => [
-                    'ids' => $item->favourite_ids ? explode(',', $item->favourite_ids) : [],
-                    'is_favourites' => $item->is_favourite ? explode(',', $item->is_favourite) : []
+                'creator' => [
+                    'name' => $item->name,
+                    'image' => $item->image
                 ],
-                'comments' => [
-                    'ids' => $item->comment_ids ? explode(',', $item->comment_ids) : [],
-                    'comment_texts' => $item->comment_texts ? explode(',', $item->comment_texts) : []
-                ]
+                'business_name' => $item->business_name, 
+                'text' => $item->text,
+                'media_urls' => $urls_array ? $urls_array : null,
+                'rating' => $item->rating,
+                'hashtags' => $hashtags_array ? $hashtags_array : null,
+                'epoch_date' => $item->epoch_date,
+                'favourite_count' => $item->favourite_count ? (int)$item->favourite_count : 0,
+                'not_favourite_count' => $item->not_favourite_count ? (int)$item->not_favourite_count : 0,
+                'like_status' => $item->is_favourite !== null ? (int)$item->is_favourite : null,
+                'total_comments' => (int)$item->total_comments,
             ];
         });
     
-        return response()->json($processedFeed);
+        return response()->json(['success' => true,'data' => $processedFeed],200);
     }
-
-
-
-
+    
 
     public function signin_with_phone_number(Request $request)
     {
